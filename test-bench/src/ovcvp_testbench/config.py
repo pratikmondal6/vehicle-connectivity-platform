@@ -1,0 +1,2 @@
+BASE_URL = "http://localhost:8080"
+REQUEST_TIMEOUT_SECONDS = 5
