@@ -1,26 +1,30 @@
-from ovcvp_testbench.validation.validator import validate
+from ovcvp_testbench.validation.validator import ValidationContext
 
 
 def run_ecu_restart(client):
 
-    before = client.get("/api/ecu")
+    context = ValidationContext("ECU restart")
 
-    previous_restart_count = before["restartCount"]
+    try:
+        before = client.get("/api/ecu")
+        previous_count = before["restartCount"]
 
-    client.post("/api/ecu/restart")
+        client.post("/api/ecu/restart")
 
-    after = client.get("/api/ecu")
+        after = client.get("/api/ecu")
 
-    result = validate(
-        scenario="ECU restart",
-        condition=(
-            after["status"] == "RESTARTING"
-            and after["restartCount"] == previous_restart_count + 1
-        ),
-        success_message="ECU restart detected correctly",
-        failure_message=f"Unexpected ECU state: {after}"
-    )
+        return context.result(
+            condition=(
+                after["status"] == "RESTARTING"
+                and after["restartCount"] == previous_count + 1
+            ),
+            success_message="ECU restart detected correctly",
+            failure_message="ECU restart validation failed",
+            evidence={
+                "before": before,
+                "after": after
+            }
+        )
 
-    client.post("/api/ecu/recover")
-
-    return result
+    finally:
+        client.post("/api/ecu/recover")

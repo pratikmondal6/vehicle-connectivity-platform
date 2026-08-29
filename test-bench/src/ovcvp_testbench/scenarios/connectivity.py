@@ -1,24 +1,27 @@
-from ovcvp_testbench.validation.validator import validate
+from ovcvp_testbench.validation.validator import ValidationContext
 
 
 def run_connectivity_failure(client):
 
-    client.post("/api/connectivity/disconnect")
+    context = ValidationContext("Connectivity failure")
 
-    telemetry = client.get("/api/telemetry")
+    try:
+        client.post("/api/connectivity/disconnect")
 
-    connectivity = telemetry["connectivityState"]
+        telemetry = client.get("/api/telemetry")
+        connectivity = telemetry["connectivityState"]
 
-    result = validate(
-        scenario="Connectivity failure",
-        condition=(
-            connectivity["status"] == "DISCONNECTED"
-            and connectivity["signalStrength"] == 0
-        ),
-        success_message="Connectivity failure detected correctly",
-        failure_message=f"Unexpected connectivity state: {connectivity}"
-    )
+        return context.result(
+            condition=(
+                connectivity["status"] == "DISCONNECTED"
+                and connectivity["signalStrength"] == 0
+            ),
+            success_message="Connectivity failure detected correctly",
+            failure_message="Connectivity failure was not detected",
+            evidence={
+                "connectivity": connectivity
+            }
+        )
 
-    client.post("/api/connectivity/connect")
-
-    return result
+    finally:
+        client.post("/api/connectivity/connect")

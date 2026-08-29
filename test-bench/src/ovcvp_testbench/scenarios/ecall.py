@@ -1,23 +1,41 @@
-from ovcvp_testbench.validation.validator import validate
+from ovcvp_testbench.validation.validator import ValidationContext
 
 
 def run_ecall_success(client):
 
-    client.post("/api/connectivity/connect")
-    client.post("/api/ecu/recover")
-    client.post("/api/calls/reset")
+    context = ValidationContext("eCall success")
 
-    client.post("/api/calls/ecall")
-    client.post("/api/calls/connect")
+    try:
+        client.post("/api/connectivity/connect")
+        client.post("/api/ecu/recover")
+        client.post("/api/calls/reset")
 
-    call = client.get("/api/calls")
+        client.post("/api/calls/ecall")
+        client.post("/api/calls/connect")
 
-    return validate(
-        scenario="eCall success",
-        condition=(
+        call = client.get("/api/calls")
+        connectivity = client.get("/api/connectivity")
+        ecu = client.get("/api/ecu")
+
+        condition = (
             call["type"] == "ECALL"
             and call["status"] == "CONNECTED"
-        ),
-        success_message="eCall connected successfully",
-        failure_message=f"Unexpected call state: {call}"
-    )
+            and connectivity["status"] == "CONNECTED"
+            and ecu["status"] == "HEALTHY"
+        )
+
+        return context.result(
+            condition=condition,
+            success_message="eCall connected successfully",
+            failure_message="eCall validation failed",
+            evidence={
+                "call": call,
+                "connectivity": connectivity,
+                "ecu": ecu
+            }
+        )
+
+    finally:
+        client.post("/api/calls/reset")
+        client.post("/api/connectivity/connect")
+        client.post("/api/ecu/recover")
