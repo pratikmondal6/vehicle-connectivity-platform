@@ -1,6 +1,7 @@
 package com.ovcvp.telematics.controller;
 
 import com.ovcvp.telematics.domain.VehicleState;
+import com.ovcvp.telematics.dto.UpdateBatteryRequest;
 import com.ovcvp.telematics.dto.UpdateSpeedRequest;
 import com.ovcvp.telematics.service.VehicleStateService;
 import jakarta.validation.Valid;
@@ -26,6 +27,15 @@ public class VehicleController {
             @Valid @RequestBody UpdateSpeedRequest request) {
 
         vehicleStateService.updateSpeed(request.getSpeedKph());
+
+        return vehicleStateService.getCurrentState();
+    }
+
+    @PostMapping("/battery")
+    public VehicleState updateBattery(
+            @Valid @RequestBody UpdateBatteryRequest request) {
+
+        vehicleStateService.updateBattery(request.getBatteryPercent());
 
         return vehicleStateService.getCurrentState();
     }

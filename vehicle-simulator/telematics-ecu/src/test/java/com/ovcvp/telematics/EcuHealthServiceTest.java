@@ -45,6 +45,7 @@ class EcuHealthServiceTest {
         );
     }
 
+
     @Test
     void shouldIncreaseUptime() throws InterruptedException {
 
