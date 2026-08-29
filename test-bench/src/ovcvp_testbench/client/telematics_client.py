@@ -30,3 +30,13 @@ class TelematicsClient:
         response.raise_for_status()
 
         return response.json()
+
+    def get_text(self, path: str) -> str:
+        response = requests.get(
+            f"{self.base_url}{path}",
+            timeout=REQUEST_TIMEOUT_SECONDS
+        )
+
+        response.raise_for_status()
+
+        return response.text
