@@ -44,4 +44,16 @@ class EcuHealthServiceTest {
                 service.getCurrentState().getStatus()
         );
     }
+
+    @Test
+    void shouldIncreaseUptime() throws InterruptedException {
+
+        EcuHealthService service = new EcuHealthService();
+
+        Thread.sleep(1100);
+
+        long uptime = service.getCurrentState().getUptimeSeconds();
+
+        assertEquals(1, uptime);
+    }
 }
