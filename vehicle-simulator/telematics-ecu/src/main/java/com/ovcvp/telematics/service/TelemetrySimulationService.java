@@ -1,7 +1,5 @@
 package com.ovcvp.telematics.service;
 
-import com.ovcvp.telematics.domain.EcuHealth;
-import com.ovcvp.telematics.domain.EcuStatus;
 import com.ovcvp.telematics.domain.TelemetryEvent;
 import org.springframework.stereotype.Service;
 
@@ -12,28 +10,23 @@ public class TelemetrySimulationService {
 
     private final VehicleStateService vehicleStateService;
     private final ConnectivityStateService connectivityStateService;
+    private final EcuHealthService ecuHealthService;
 
     public TelemetrySimulationService(
             VehicleStateService vehicleStateService,
-            ConnectivityStateService connectivityStateService) {
+            ConnectivityStateService connectivityStateService,
+            EcuHealthService ecuHealthService) {
         this.vehicleStateService = vehicleStateService;
         this.connectivityStateService = connectivityStateService;
+        this.ecuHealthService = ecuHealthService;
     }
 
     public TelemetryEvent generateTelemetry() {
-
-        EcuHealth ecuHealth = new EcuHealth(
-                "TCU-001",
-                EcuStatus.HEALTHY,
-                8400,
-                0
-        );
-
         return new TelemetryEvent(
                 Instant.now(),
                 vehicleStateService.getCurrentState(),
                 connectivityStateService.getCurrentState(),
-                ecuHealth
+                ecuHealthService.getCurrentState()
         );
     }
 }
